@@ -18,6 +18,7 @@
 #include <ostream>
 #include <string>
 #include <map>
+#include <stdexcept>
 #include <boost/asio.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/format.hpp>

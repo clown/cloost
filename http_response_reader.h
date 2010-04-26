@@ -60,7 +60,7 @@ namespace cloost {
 			while (boost::asio::read(s, buf, boost::asio::transfer_at_least(1), error));
 			if (error != boost::asio::error::eof) throw boost::system::system_error(error);
 			
-			string_type dest(boost::asio::buffer_cast<const char_type*>(buf.data()), buf.size());
+			const string_type dest(boost::asio::buffer_cast<const char_type*>(buf.data()), buf.size());
 			buf.consume(buf.size());
 			return dest;
 		}
@@ -76,7 +76,7 @@ namespace cloost {
 			}
 			if (buf.size() < n) throw std::runtime_error("too few data");
 			
-			string_type dest(boost::asio::buffer_cast<const char_type*>(buf.data()), n);
+			const string_type dest(boost::asio::buffer_cast<const char_type*>(buf.data()), n);
 			buf.consume(n);
 			return dest;
 		}

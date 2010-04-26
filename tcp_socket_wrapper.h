@@ -14,6 +14,9 @@
 #ifndef CLOOST_TCP_SOCKET_WRAPPER_H
 #define CLOOST_TCP_SOCKET_WRAPPER_H
 
+#include <string>
+#include <boost/asio.hpp>
+
 namespace cloost {
 	namespace tcp {
 		/* ----------------------------------------------------------------- */

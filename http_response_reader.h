@@ -19,7 +19,6 @@
 #include <string>
 #include <stdexcept>
 #include <boost/asio.hpp>
-#include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/lexical_cast.hpp>
 #include "http_response.h"
@@ -40,7 +39,7 @@ namespace cloost {
 		template <class SyncReadStream, class MutableBuffers>
 		void operator()(SyncReadStream& s, MutableBuffers& buf, http_response& response) {
 			if (response.headers().find("Transfer-Encoding") != response.headers().end() &&
-				boost::to_lower_copy(response.headers().find("Transfer-Encoding")->second) == "chunked") {
+				response.headers().find("Transfer-Encoding")->second == "chunked") {
 				response.body(this->read_chunked_data(s, buf));
 			}
 			else if (response.headers().find("Content-Length") != response.headers().end()) {

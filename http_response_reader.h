@@ -36,8 +36,8 @@ namespace cloost {
 		/* ----------------------------------------------------------------- */
 		//  operator()
 		/* ----------------------------------------------------------------- */
-		template <class SyncReadStream, class MutableBuffers>
-		void operator()(SyncReadStream& s, MutableBuffers& buf, http_response& response) {
+		template <class SyncReadStream, class MutableBuffer>
+		void operator()(SyncReadStream& s, MutableBuffer& buf, http_response& response) {
 			if (response.headers().find("Transfer-Encoding") != response.headers().end() &&
 				response.headers().find("Transfer-Encoding")->second == "chunked") {
 				response.body(this->read_chunked_data(s, buf));
@@ -53,8 +53,8 @@ namespace cloost {
 		/* ----------------------------------------------------------------- */
 		//  read_data
 		/* ----------------------------------------------------------------- */
-		template <class SyncReadStream, class MutableBuffers>
-		string_type read_data(SyncReadStream& s, MutableBuffers& buf) {
+		template <class SyncReadStream, class MutableBuffer>
+		string_type read_data(SyncReadStream& s, MutableBuffer& buf) {
 			boost::system::error_code error;
 			while (boost::asio::read(s, buf, boost::asio::transfer_at_least(1), error));
 			if (error != boost::asio::error::eof) throw boost::system::system_error(error);
@@ -67,8 +67,8 @@ namespace cloost {
 		/* ----------------------------------------------------------------- */
 		//  read_data
 		/* ----------------------------------------------------------------- */
-		template <class SyncReadStream, class MutableBuffers>
-		string_type read_data(SyncReadStream& s, MutableBuffers& buf, size_type n) {
+		template <class SyncReadStream, class MutableBuffer>
+		string_type read_data(SyncReadStream& s, MutableBuffer& buf, size_type n) {
 			if (buf.size() < n) {
 				boost::system::error_code error;
 				boost::asio::read(s, buf, boost::asio::transfer_at_least(n - buf.size()), error);
@@ -83,8 +83,8 @@ namespace cloost {
 		/* ----------------------------------------------------------------- */
 		//  read_chunked_data
 		/* ----------------------------------------------------------------- */
-		template <class SyncReadStream, class MutableBuffers>
-		string_type read_chunked_data(SyncReadStream& s, MutableBuffers& buf) {
+		template <class SyncReadStream, class MutableBuffer>
+		string_type read_chunked_data(SyncReadStream& s, MutableBuffer& buf) {
 			string_type dest;
 			std::basic_istream<char_type> input(&buf);
 			

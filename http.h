@@ -8,7 +8,7 @@
  *  Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
  *  http://www.boost.org/LICENSE_1_0.txt)
  *
- *  Last-modified: Thu 01 Apr 2010 11:09:00 JST
+ *  Last-modified: Tue 27 Apr 2010 04:04:00 JST
  */
 /* ------------------------------------------------------------------------- */
 #ifndef CLOOST_HTTP_H
@@ -72,10 +72,22 @@ namespace cloost {
 		~basic_http() throw() {}
 		
 		/* ----------------------------------------------------------------- */
+		//  head
+		/* ----------------------------------------------------------------- */
+		http_response head(const string_type& path, const header_map& options = header_map()) {
+			this->write_request("HEAD", path, options, string_type());
+			
+			http_response dest;
+			boost::asio::streambuf buffer;
+			this->read_response_header(buffer, dest);
+			return dest;
+		}
+		
+		/* ----------------------------------------------------------------- */
 		//  get
 		/* ----------------------------------------------------------------- */
-		template <class HttpReader>
-		http_response get(const string_type& path, HttpReader f, const header_map& options = header_map()) {
+		template <class ResponseReader>
+		http_response get(ResponseReader f, const string_type& path, const header_map& options = header_map()) {
 			this->write_request("GET", path, options, string_type());
 			
 			http_response dest;
@@ -90,7 +102,29 @@ namespace cloost {
 		/* ----------------------------------------------------------------- */
 		http_response get(const string_type& path, const header_map& options = header_map()) {
 			cloost::http_response_reader f;
-			return this->get(path, f, options);
+			return this->get(f, path, options);
+		}
+		
+		/* ----------------------------------------------------------------- */
+		//  post
+		/* ----------------------------------------------------------------- */
+		template <class ResponseReader>
+		http_response post(ResponseReader f, const string_type& path, const string_type& body, const header_map& options = header_map()) {
+			this->write_request("POST", path, options, body);
+			
+			http_response dest;
+			boost::asio::streambuf buffer;
+			this->read_response_header(buffer, dest);
+			f(socket_.socket(), buffer, dest);
+			return dest;
+		}
+		
+		/* ----------------------------------------------------------------- */
+		//  post
+		/* ----------------------------------------------------------------- */
+		http_response post(const string_type& path, const string_type& body, const header_map& options = header_map()) {
+			cloost::http_response_reader f;
+			return this->post(f, path, body, options);
 		}
 		
 		/* ----------------------------------------------------------------- */
@@ -134,8 +168,8 @@ namespace cloost {
 		/* ----------------------------------------------------------------- */
 		//  read_response_header
 		/* ----------------------------------------------------------------- */
-		template <class MutableBuffers>
-		void read_response_header(MutableBuffers& buf, http_response& dest) {
+		template <class MutableBuffer>
+		void read_response_header(MutableBuffer& buf, http_response& dest) {
 			std::basic_istream<char_type> input(&buf);
 			
 			// check status code.

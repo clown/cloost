@@ -36,7 +36,6 @@
 #include <boost/preprocessor/repetition/enum_params.hpp>
 #include <boost/preprocessor/repetition/repeat_from_to.hpp>
 
-#define CLOOST_HTTP_MAX_ARITY 1
 #define CLOOST_HTTP_RRIVATE_CTR_DEF(z, n, data) \
 	template <BOOST_PP_ENUM_PARAMS(n, typename T)> \
 	basic_http(boost::asio::io_service& service, const string_type& host, const string_type& port, \
@@ -63,9 +62,21 @@ namespace cloost {
 			socket_(service), version_(1.1), host_(host), port_(port) {}
 		
 		/* ----------------------------------------------------------------- */
-		//  constructor
+		/*
+		 *  constructor
+		 *
+		 *  If you use C++0x, you can also write the following descritpion,
+		 *  instead of using Boost.Preprocessor libraries.
+		 *
+		 *  template <class ...Args>
+		 *  basic_http(boost::asio::io_service& service,
+		 *      const string_type& host, const string_type& port,
+		 *      Args... args) :
+		 *      socket_(service, args), version_(1.1),
+		 *      host_(host), port_(port) {}
+		 */
 		/* ----------------------------------------------------------------- */
-		BOOST_PP_REPEAT_FROM_TO(1, BOOST_PP_INC(CLOOST_HTTP_MAX_ARITY), CLOOST_HTTP_RRIVATE_CTR_DEF, _)
+		BOOST_PP_REPEAT_FROM_TO(1, BOOST_PP_INC(CLOOST_SOCKET_WRAPPER_MAX_ARITY), CLOOST_HTTP_RRIVATE_CTR_DEF, _)
 		
 		/* ----------------------------------------------------------------- */
 		//  destructor

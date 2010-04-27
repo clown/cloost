@@ -14,6 +14,7 @@
 #ifndef CLOOST_HTTP_H
 #define CLOOST_HTTP_H
 
+#include "config.h"
 #include <istream>
 #include <ostream>
 #include <string>

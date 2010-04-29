@@ -69,6 +69,8 @@ namespace cloost {
 		/* ----------------------------------------------------------------- */
 		template <class SyncReadStream, class MutableBuffer>
 		string_type read_data(SyncReadStream& s, MutableBuffer& buf, size_type n) {
+			if (n == 0) return string_type();
+			
 			if (buf.size() < n) {
 				boost::system::error_code error;
 				boost::asio::read(s, buf, boost::asio::transfer_at_least(n - buf.size()), error);

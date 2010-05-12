@@ -28,7 +28,7 @@ namespace cloost {
 		typedef std::basic_string<char_type> string_type;
 		typedef std::map<std::string, std::string> header_map;
 		typedef header_map::iterator header_iterator;
-		typedef header_map::const_iterator header_const_iterator;
+		typedef header_map::const_iterator const_header_iterator;
 		
 		const size_type& status() const { return status_; }
 		const header_map& headers() const { return headers_; }

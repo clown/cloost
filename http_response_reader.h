@@ -37,16 +37,16 @@ namespace cloost {
 		//  operator()
 		/* ----------------------------------------------------------------- */
 		template <class SyncReadStream, class MutableBuffer>
-		void operator()(SyncReadStream& s, MutableBuffer& buf, http_response& response) {
-			if (response.headers().find("Transfer-Encoding") != response.headers().end() &&
-				response.headers().find("Transfer-Encoding")->second == "chunked") {
-				response.body(this->read_chunked_data(s, buf));
+		void operator()(SyncReadStream& s, MutableBuffer& buf, http_response& dest) {
+			http_response::const_header_iterator pos;
+			if ((pos = dest.headers().find("Transfer-Encoding")) != dest.headers().end() && pos->second == "chunked") {
+				dest.body(this->read_chunked_data(s, buf));
 			}
-			else if (response.headers().find("Content-Length") != response.headers().end()) {
-				const size_type n = boost::lexical_cast<size_type>(response.headers().find("Content-Length")->second);
-				response.body(this->read_data(s, buf, n));
+			else if ((pos = dest.headers().find("Content-Length")) != dest.headers().end()) {
+				const size_type n = boost::lexical_cast<size_type>(pos->second);
+				dest.body(this->read_data(s, buf, n));
 			}
-			else response.body(this->read_data(s, buf));
+			else dest.body(this->read_data(s, buf));
 		}
 		
 	private:

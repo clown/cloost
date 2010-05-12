@@ -150,8 +150,8 @@ namespace cloost {
 	private:
 		SocketWrapper socket_;
 		double version_;
-		string_type host_;
-		string_type port_;
+		const string_type host_;
+		const string_type port_;
 		
 		/* ----------------------------------------------------------------- */
 		//  write_request
@@ -200,12 +200,20 @@ namespace cloost {
 			// parse response header
 			boost::asio::read_until(socket_.socket(), buf, "\r\n\r\n");
 			string_type header;
-			while (std::getline(input, header) && header != "\r") {
-				const size_type pos = header.find_first_of(':');
-				if (pos == string_type::npos) continue;
-				const string_type key = header.substr(0, pos);
-				const string_type value = boost::trim_copy(header.substr(pos + 1));
-				dest.headers().insert(std::make_pair(key, value));
+			string_type key;
+			while (std::getline(input, header) && !header.empty() && header != "\r") {
+				if (header.at(0) == 0x09 || header.at(0) == 0x20) {
+					http_response::header_iterator pos = dest.headers().find(key);
+					if (pos == dest.headers().end()) std::runtime_error("invalid http response");
+					pos->second += boost::trim_copy(header);
+				}
+				else {
+					const size_type pos = header.find_first_of(':');
+					if (pos == string_type::npos) std::runtime_error("invalid http response");
+					key = header.substr(0, pos);
+					const string_type value = boost::trim_copy(header.substr(pos + 1));
+					dest.headers().insert(std::make_pair(key, value));
+				}
 			}
 		}
 	};

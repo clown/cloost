@@ -89,7 +89,10 @@ namespace cloost {
 			const clx::sha1& hmac = clx::hmac<clx::sha1>(key.c_str(), key.size(), val.c_str(), val.size());
 			string_type hm = clx::base64::encode(reinterpret_cast<const char*>(hmac.code()), 20);
 			ss << "&oauth_signature=" << clx::convert(hm, f);
-			return session_.post(clx::uri::encode(path), ss.str());
+			
+			http_request_header options;
+			options["content-type"] = "application/x-www-form-urlencoded";
+			return session_.post(clx::uri::encode(path), ss.str(), options);
 		}
 		
 		/* ----------------------------------------------------------------- */

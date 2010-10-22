@@ -56,12 +56,7 @@ namespace cloost {
 		}
 		
 		/* ----------------------------------------------------------------- */
-		/*
-		 *  get_access_token
-		 *
-		 *  The function is derived form the following URL:
-		 *  http://mattn.kaoriya.net/software/lang/c/20100911222528.htm
-		 */
+		//  get_access_token
 		/* ----------------------------------------------------------------- */
 		http_response get_access_token(const string_type& pin) {
 			parameter_map params;

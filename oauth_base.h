@@ -79,19 +79,16 @@ namespace cloost {
 			}
 			
 			string_type key = consumer_secret_ + "&" + oauth_token_secret_;
-			clx::uri_encoder encoder("-._~", false, false);
-			string_type uri = traits::protocol() + string_type("://") + traits::domain() + path;
-			string_type val = "POST&";
-			val += clx::convert(uri, encoder);
-			val += "&";
-			val += clx::convert(ss.str(), encoder);
+			clx::uri_encoder f("-._~", false, false);
+			string_type uri = traits::protocol() + string_type("://") + traits::domain();
+			string_type port = traits::port();
+			if (port != "80" && port != "443") uri += ":" + port;
+			uri += path;
+			string_type val = "POST&" + clx::convert(uri, f) + "&" + clx::convert(ss.str(), f);
 			
 			const clx::sha1& hmac = clx::hmac<clx::sha1>(key.c_str(), key.size(), val.c_str(), val.size());
 			string_type hm = clx::base64::encode(reinterpret_cast<const char*>(hmac.code()), 20);
-			ss << "&oauth_signature=" << clx::convert(hm, encoder);
-			
-			cloost::http_request_header options;
-			options["Authorization"] = "OAuth";
+			ss << "&oauth_signature=" << clx::convert(hm, f);
 			return session_.post(clx::uri::encode(path), ss.str());
 		}
 		

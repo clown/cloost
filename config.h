@@ -19,10 +19,10 @@
 /* ------------------------------------------------------------------------- */
 #define CLOOST_SOCKET_WRAPPER_MAX_ARITY 4
 
-#ifdef CLOOST_NET_MINIMUM_SET
+#ifdef CLOOST_NET_MIN_LIB
 #define BOOST_REGEX_NO_LIB
 #define BOOST_DATE_TIME_NO_LIB
-#endif // CLOOST_NETWORK_MINIMUM_SET
+#endif // CLOOST_NET_MIN_LIB
 
 #if defined(__CYGWIN__) || defined(__CYGWIN32__) || defined(__MINGW32__)
 #define __USE_W32_SOCKETS

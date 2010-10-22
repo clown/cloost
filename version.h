@@ -8,7 +8,7 @@
  *  Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
  *  http://www.boost.org/LICENSE_1_0.txt)
  *
- *  Last-modified: Tue 27 Apr 2010 16:42:00 JST
+ *  Last-modified: Fri 22 Oct 2010 11:22:00 JST
  */
 /* ------------------------------------------------------------------------- */
 #ifndef CLOOST_VERSION_H
@@ -22,7 +22,7 @@
  */
 /* ------------------------------------------------------------------------- */
 #define CLOOST_VERSION 0010
-#define CLOOST_VERSION_STR "0.1.0"
+#define CLOOST_VERSION_STR "0.1.1"
 
 #define CLOOST_AUTHOR "clown"
 #define CLOOST_MAILTO "tt.clown@gmail.com"

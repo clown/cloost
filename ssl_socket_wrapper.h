@@ -30,18 +30,18 @@ namespace cloost {
 			typedef std::basic_string<char_type> string_type;
 			
 			/* ------------------------------------------------------------- */
-			//  start
+			//  constructro
 			/* ------------------------------------------------------------- */
 			socket_wrapper(boost::asio::io_service& service, boost::asio::ssl::context& ctx) :
 				service_(service), socket_(service, ctx) {}
 			
 			/* ------------------------------------------------------------- */
-			//  start
+			//  reset
 			/* ------------------------------------------------------------- */
-			void start(const string_type& host, const string_type& port) {
+			void reset() {
 				// Get a list of endpoints corresponding to the server name.
 				boost::asio::ip::tcp::resolver resolver(service_);
-				boost::asio::ip::tcp::resolver::query query(host, port);
+				boost::asio::ip::tcp::resolver::query query(host_, port_);
 				boost::asio::ip::tcp::resolver::iterator pos = resolver.resolve(query);
 				boost::asio::ip::tcp::resolver::iterator last;
 				
@@ -56,13 +56,26 @@ namespace cloost {
 			}
 			
 			/* ------------------------------------------------------------- */
-			//  socket
+			//  reset
+			/* ------------------------------------------------------------- */
+			void reset(const string_type& host, const string_type& port) {
+				host_ = host;
+				port_ = port;
+				this->reset();
+			}
+			
+			/* ------------------------------------------------------------- */
+			//  access methods
 			/* ------------------------------------------------------------- */
 			socket_type& socket() { return socket_; }
+			const string_type& host() const { return host_; }
+			const string_type& port() const { return port_; }
 			
 		private:
 			boost::asio::io_service& service_;
 			socket_type socket_;
+			string_type host_;
+			string_type port_;
 		};
 	}
 }

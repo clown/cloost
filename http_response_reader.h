@@ -21,7 +21,7 @@
 #include <boost/asio.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/lexical_cast.hpp>
-#include "http_response.h"
+#include "http_utility.h"
 
 namespace cloost {
 	/* --------------------------------------------------------------------- */
@@ -36,8 +36,61 @@ namespace cloost {
 		/* ----------------------------------------------------------------- */
 		//  operator()
 		/* ----------------------------------------------------------------- */
-		template <class SyncReadStream, class MutableBuffer>
-		void operator()(SyncReadStream& s, MutableBuffer& buf, http_response& dest) {
+		template <class SocketWrapper>
+		http_response operator()(SocketWrapper& s) {
+			http_response dest;
+			boost::asio::streambuf buf;
+			this->read_header(s, buf, dest);
+			this->read_body(s, buf, dest);
+			return dest;
+		}
+		
+	private:
+		/* ----------------------------------------------------------------- */
+		//  read_header
+		/* ----------------------------------------------------------------- */
+		template <class SocketWrapper, class MutableBuffer>
+		void read_header(SocketWrapper& s, MutableBuffer& buf, http_response& dest) {
+			std::basic_istream<char_type> input(&buf);
+			
+			// check status code.
+			boost::asio::read_until(s.socket(), buf, "\r\n");
+			string_type version;
+			input >> version;
+			size_type code;
+			input >> code;
+			string_type message;
+			std::getline(input, message);
+			if (!input || version.substr(0, 5) != "HTTP/") {
+				throw std::runtime_error("invalid http response");
+			}
+			dest.status(code);
+			
+			// parse response header
+			boost::asio::read_until(s.socket(), buf, "\r\n\r\n");
+			string_type header;
+			string_type key;
+			while (std::getline(input, header) && !header.empty() && header != "\r") {
+				if (header.at(0) == 0x09 || header.at(0) == 0x20) {
+					http_response::header_iterator pos = dest.headers().find(key);
+					if (pos == dest.headers().end()) std::runtime_error("invalid http response");
+					pos->second += boost::trim_copy(header);
+				}
+				else {
+					const size_type pos = header.find_first_of(':');
+					if (pos == string_type::npos) std::runtime_error("invalid http response");
+					key = header.substr(0, pos);
+					const string_type value = boost::trim_copy(header.substr(pos + 1));
+					dest.headers().insert(std::make_pair(key, value));
+				}
+			}
+		}
+		
+		/* ----------------------------------------------------------------- */
+		//  read_body
+		/* ----------------------------------------------------------------- */
+		template <class SocketWrapper, class MutableBuffer>
+		void read_body(SocketWrapper& s, MutableBuffer& buf, http_response& dest) {
 			http_response::const_header_iterator pos;
 			if ((pos = dest.headers().find("Transfer-Encoding")) != dest.headers().end() && pos->second == "chunked") {
 				dest.body(this->read_chunked_data(s, buf));
@@ -49,14 +102,13 @@ namespace cloost {
 			else dest.body(this->read_data(s, buf));
 		}
 		
-	private:
 		/* ----------------------------------------------------------------- */
 		//  read_data
 		/* ----------------------------------------------------------------- */
-		template <class SyncReadStream, class MutableBuffer>
-		string_type read_data(SyncReadStream& s, MutableBuffer& buf) {
+		template <class SocketWrapper, class MutableBuffer>
+		string_type read_data(SocketWrapper& s, MutableBuffer& buf) {
 			boost::system::error_code error;
-			while (boost::asio::read(s, buf, boost::asio::transfer_at_least(1), error));
+			while (boost::asio::read(s.socket(), buf, boost::asio::transfer_at_least(1), error));
 			if (error != boost::asio::error::eof) throw boost::system::system_error(error);
 			
 			const string_type dest(boost::asio::buffer_cast<const char_type*>(buf.data()), buf.size());
@@ -67,13 +119,13 @@ namespace cloost {
 		/* ----------------------------------------------------------------- */
 		//  read_data
 		/* ----------------------------------------------------------------- */
-		template <class SyncReadStream, class MutableBuffer>
-		string_type read_data(SyncReadStream& s, MutableBuffer& buf, size_type n) {
+		template <class SocketWrapper, class MutableBuffer>
+		string_type read_data(SocketWrapper& s, MutableBuffer& buf, size_type n) {
 			if (n == 0) return string_type();
 			
 			if (buf.size() < n) {
 				boost::system::error_code error;
-				boost::asio::read(s, buf, boost::asio::transfer_at_least(n - buf.size()), error);
+				boost::asio::read(s.socket(), buf, boost::asio::transfer_at_least(n - buf.size()), error);
 			}
 			if (buf.size() < n) throw std::runtime_error("too few data");
 			
@@ -85,13 +137,13 @@ namespace cloost {
 		/* ----------------------------------------------------------------- */
 		//  read_chunked_data
 		/* ----------------------------------------------------------------- */
-		template <class SyncReadStream, class MutableBuffer>
-		string_type read_chunked_data(SyncReadStream& s, MutableBuffer& buf) {
+		template <class SocketWrapper, class MutableBuffer>
+		string_type read_chunked_data(SocketWrapper& s, MutableBuffer& buf) {
 			string_type dest;
 			std::basic_istream<char_type> input(&buf);
 			
 			while (1) {
-				boost::asio::read_until(s, buf, "\r\n");
+				boost::asio::read_until(s.socket(), buf, "\r\n");
 				string_type line;
 				if (!std::getline(input, line)) throw std::runtime_error("invalid chunked data");
 				boost::trim_right(line);

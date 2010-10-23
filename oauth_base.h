@@ -79,16 +79,15 @@ namespace cloost {
 			}
 			
 			string_type key = consumer_secret_ + "&" + oauth_token_secret_;
-			clx::uri_encoder f("-._~", false, false);
 			string_type uri = traits::protocol() + string_type("://") + traits::domain();
 			string_type port = traits::port();
 			if (port != "80" && port != "443") uri += ":" + port;
 			uri += path;
-			string_type val = "POST&" + clx::convert(uri, f) + "&" + clx::convert(ss.str(), f);
+			string_type val = "POST&" + encode(uri) + "&" + encode(ss.str());
 			
 			const clx::sha1& hmac = clx::hmac<clx::sha1>(key.c_str(), key.size(), val.c_str(), val.size());
 			string_type hm = clx::base64::encode(reinterpret_cast<const char*>(hmac.code()), 20);
-			ss << "&oauth_signature=" << clx::convert(hm, f);
+			ss << "&oauth_signature=" << encode(hm);
 			
 			http_request_header options;
 			options["content-type"] = "application/x-www-form-urlencoded";
@@ -112,6 +111,15 @@ namespace cloost {
 		void consumer_secret(const string_type& cp) { consumer_secret_ = cp; }
 		void oauth_token(const string_type& cp) { oauth_token_ = cp; }
 		void oauth_token_secret(const string_type& cp) { oauth_token_secret_ = cp; }
+		
+		
+		/* ----------------------------------------------------------------- */
+		//  encode
+		/* ----------------------------------------------------------------- */
+		static string_type encode(const string_type& src) {
+			static clx::uri_encoder f("-._~", false, false);
+			return clx::convert(src, f);
+		}
 		
 	protected:
 		cloost::https& session() { return session_; }

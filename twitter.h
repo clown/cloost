@@ -1,3 +1,16 @@
+/* ------------------------------------------------------------------------- */
+/*
+ *  twitter.h
+ *
+ *  Copyright (c) 2010, clown. All rights reserved.
+ *
+ *  Distributed under the Boost Software License,
+ *  Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
+ *  http://www.boost.org/LICENSE_1_0.txt)
+ *
+ *  Last-modified: Sat 23 Oct 2010 12:04:00 JST
+ */
+/* ------------------------------------------------------------------------- */
 #ifndef CLOOST_TWITTER_H
 #define CLOOST_TWITTER_H
 
@@ -10,7 +23,7 @@ namespace cloost {
 		typedef char char_type;
 		
 		static const char_type* protocol() { return "https"; }
-		static const char_type* domain() { return "api.twitter.com"; }
+		static const char_type* domain() { return "twitter.com"; }
 		static const char_type* port() { return "443"; }
 		static const char_type* request_token_path() { return "/oauth/request_token"; }
 		static const char_type* access_token_path() { return "/oauth/access_token"; }

@@ -87,7 +87,8 @@ namespace cloost {
 			
 			const clx::sha1& hmac = clx::hmac<clx::sha1>(key.c_str(), key.size(), val.c_str(), val.size());
 			string_type hm = clx::base64::encode(reinterpret_cast<const char*>(hmac.code()), 20);
-			ss << "&oauth_signature=" << encode(hm);
+			string_type sig = encode(hm);
+			ss << "&oauth_signature=" << sig;
 			
 			http_request_header options;
 			options["content-type"] = "application/x-www-form-urlencoded";
@@ -127,7 +128,7 @@ namespace cloost {
 	private:
 		cloost::https session_;
 		
-		// xauth user settings
+		// oauth user settings
 		string_type consumer_key_;
 		string_type consumer_secret_;
 		string_type oauth_token_;
@@ -152,6 +153,24 @@ namespace cloost {
 			}
 			
 			return dest;
+		}
+		
+		/* ----------------------------------------------------------------- */
+		//  authorization_header
+		/* ----------------------------------------------------------------- */
+		string_type authorization_header(const string_type& sig) {
+			parameter_map users;
+			users["oauth_signature"] = sig;
+			parameter_map params = this->merge(users);
+			
+			string_type uri = traits::protocol() + string_type("://") + traits::domain() + "/";
+			std::basic_stringstream<char_type> ss;
+			ss << "OAuth realm=\"" << uri << "\"";
+			for (parameter_map::const_iterator pos = params.begin(); pos != params.end(); ++pos) {
+				ss << ',';
+				ss << pos->first << "=\"" << pos->second << "\"";
+			}
+			return ss.str();
 		}
 	};
 }

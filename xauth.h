@@ -26,20 +26,21 @@ namespace cloost {
 	/* --------------------------------------------------------------------- */
 	//  basic_xauth
 	/* --------------------------------------------------------------------- */
-	template <class DomainTraits>
-	class basic_xauth : public basic_oauth_base<DomainTraits> {
+	template <class Http, class DomainTraits>
+	class basic_xauth : public basic_oauth_base<Http, DomainTraits> {
 	public:
-		typedef typename basic_oauth_base<DomainTraits>::char_type char_type;
-		typedef typename basic_oauth_base<DomainTraits>::string_type string_type;
-		typedef typename basic_oauth_base<DomainTraits>::parameter_map parameter_map;
-		typedef typename basic_oauth_base<DomainTraits>::traits traits;
+		typedef typename basic_oauth_base<Http, DomainTraits>::char_type char_type;
+		typedef typename basic_oauth_base<Http, DomainTraits>::string_type string_type;
+		typedef typename basic_oauth_base<Http, DomainTraits>::parameter_map parameter_map;
+		typedef typename basic_oauth_base<Http, DomainTraits>::http http;
+		typedef typename basic_oauth_base<Http, DomainTraits>::traits traits;
 		
 		/* ----------------------------------------------------------------- */
 		//  constructor
 		/* ----------------------------------------------------------------- */
-		basic_xauth(boost::asio::io_service& service, boost::asio::ssl::context& ctx,
-			const string_type& consumer_key, const string_type& consumer_secret) :
-			basic_oauth_base<DomainTraits>(service, ctx, consumer_key, consumer_secret) {}
+		basic_xauth(const string_type& consumer_key, const string_type& consumer_secret,
+			boost::asio::io_service& service, boost::asio::ssl::context& ctx) :
+			basic_oauth_base<Http, DomainTraits>(consumer_key, consumer_secret, service, ctx) {}
 		
 		/* ----------------------------------------------------------------- */
 		//  destructor
@@ -54,15 +55,15 @@ namespace cloost {
 		 *  http://mattn.kaoriya.net/software/lang/c/20100911222528.htm
 		 */
 		/* ----------------------------------------------------------------- */
-		http_response get_access_token(const string_type& username, const string_type& password) {
+		typename http::response get_access_token(const string_type& username, const string_type& password) {
 			parameter_map params;
 			params["x_auth_mode"] = "client_auth";
 			params["x_auth_username"] = username;
 			params["x_auth_password"] = password;
 			
-			http_response response = this->post(traits::access_token_path(), params);
-			this->parse(response.body());
-			return response;
+			typename http::response res = this->post(traits::access_token_path(), params);
+			this->parse(res.body());
+			return res;
 		}
 		
 	private:

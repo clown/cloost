@@ -26,20 +26,21 @@ namespace cloost {
 	/* --------------------------------------------------------------------- */
 	//  constructor
 	/* --------------------------------------------------------------------- */
-	template <class DomainTraits>
-	class basic_oauth : public basic_oauth_base<DomainTraits> {
+	template <class Http, class DomainTraits>
+	class basic_oauth : public basic_oauth_base<Http, DomainTraits> {
 	public:
-		typedef typename basic_oauth_base<DomainTraits>::char_type char_type;
-		typedef typename basic_oauth_base<DomainTraits>::string_type string_type;
-		typedef typename basic_oauth_base<DomainTraits>::parameter_map parameter_map;
-		typedef typename basic_oauth_base<DomainTraits>::traits traits;
+		typedef typename basic_oauth_base<Http, DomainTraits>::char_type char_type;
+		typedef typename basic_oauth_base<Http, DomainTraits>::string_type string_type;
+		typedef typename basic_oauth_base<Http, DomainTraits>::parameter_map parameter_map;
+		typedef typename basic_oauth_base<Http, DomainTraits>::http http;
+		typedef typename basic_oauth_base<Http, DomainTraits>::traits traits;
 		
 		/* ----------------------------------------------------------------- */
 		//  constructor
 		/* ----------------------------------------------------------------- */
-		basic_oauth(boost::asio::io_service& service, boost::asio::ssl::context& ctx,
-			const string_type& consumer_key, const string_type& consumer_secret) :
-			basic_oauth_base<DomainTraits>(service, ctx, consumer_key, consumer_secret) {}
+		basic_oauth(const string_type& consumer_key, const string_type& consumer_secret,
+			boost::asio::io_service& service, boost::asio::ssl::context& ctx) :
+			basic_oauth_base<Http, DomainTraits>(consumer_key, consumer_secret, service, ctx) {}
 		
 		/* ----------------------------------------------------------------- */
 		//  destructor
@@ -49,21 +50,21 @@ namespace cloost {
 		/* ----------------------------------------------------------------- */
 		//  get_request_token
 		/* ----------------------------------------------------------------- */
-		http_response get_request_token() {
-			http_response response = this->post(traits::request_token_path(), parameter_map());
-			this->parse(response.body());
-			return response;
+		typename http::response get_request_token() {
+			typename http::response res = this->post(traits::request_token_path(), parameter_map());
+			this->parse(res.body());
+			return res;
 		}
 		
 		/* ----------------------------------------------------------------- */
 		//  get_access_token
 		/* ----------------------------------------------------------------- */
-		http_response get_access_token(const string_type& pin) {
+		typename http::response get_access_token(const string_type& pin) {
 			parameter_map params;
 			params["oauth_verifier"] = pin;
-			http_response response = this->post(traits::access_token_path(), params);
-			this->parse(response.body());
-			return response;
+			typename http::response res = this->post(traits::access_token_path(), params);
+			this->parse(res.body());
+			return res;
 		}
 		
 		/* ----------------------------------------------------------------- */

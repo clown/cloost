@@ -32,19 +32,20 @@ namespace cloost {
 	/* --------------------------------------------------------------------- */
 	//  basic_oauth_base
 	/* --------------------------------------------------------------------- */
-	template <class DomainTraits>
+	template <class Http, class DomainTraits>
 	class basic_oauth_base : boost::noncopyable {
 	public:
 		typedef char char_type;
 		typedef std::basic_string<char_type> string_type;
 		typedef std::map<string_type, string_type> parameter_map;
+		typedef Http http;
 		typedef DomainTraits traits;
 		
 		/* ----------------------------------------------------------------- */
 		//  constructor
 		/* ----------------------------------------------------------------- */
-		basic_oauth_base(boost::asio::io_service& service, boost::asio::ssl::context& ctx,
-			const string_type& consumer_key, const string_type& consumer_secret) :
+		basic_oauth_base(const string_type& consumer_key, const string_type& consumer_secret,
+			boost::asio::io_service& service, boost::asio::ssl::context& ctx) :
 			session_(service, traits::domain(), traits::port(), boost::ref(ctx)),
 			consumer_key_(consumer_key), consumer_secret_(consumer_secret),
 			oauth_token_(), oauth_token_secret_(), timestamp_(), nonce_() {
@@ -67,7 +68,7 @@ namespace cloost {
 		 *
 		 */
 		/* ----------------------------------------------------------------- */
-		http_response post(const string_type& path, const parameter_map& parameters) {
+		typename http::response post(const string_type& path, const parameter_map& parameters) {
 			parameter_map v = this->merge(parameters);
 			
 			std::basic_stringstream<char_type> ss;
@@ -90,9 +91,12 @@ namespace cloost {
 			string_type sig = encode(hm);
 			ss << "&oauth_signature=" << sig;
 			
-			http_request_header options;
+			typename http::request req;
+			typename http::request::header_map& options = req.headers();
 			options["content-type"] = "application/x-www-form-urlencoded";
-			return session_.post(clx::uri::encode(path), ss.str(), options);
+			req.path(clx::uri::encode(path));
+			req.body(ss.str());
+			return session_.post(req);
 		}
 		
 		/* ----------------------------------------------------------------- */
@@ -123,10 +127,10 @@ namespace cloost {
 		}
 		
 	protected:
-		cloost::https& session() { return session_; }
+		http& session() { return session_; }
 		
 	private:
-		cloost::https session_;
+		http session_;
 		
 		// oauth user settings
 		string_type consumer_key_;

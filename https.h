@@ -18,7 +18,7 @@
 #include "ssl_socket_wrapper.h"
 
 namespace cloost {
-	typedef basic_http<cloost::ssl::socket_wrapper> https;
+	typedef cloost::net::basic_http<cloost::ssl::socket_wrapper> https;
 }
 
 #endif // CLOOST_HTTPS_H

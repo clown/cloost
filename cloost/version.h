@@ -21,8 +21,8 @@
  *  CLOOST_VERSION / 100 / 100 is the major version
  */
 /* ------------------------------------------------------------------------- */
-#define CLOOST_VERSION 0010
-#define CLOOST_VERSION_STR "0.1.1"
+#define CLOOST_VERSION 0012
+#define CLOOST_VERSION_STR "0.1.2"
 
 #define CLOOST_AUTHOR "clown"
 #define CLOOST_MAILTO "tt.clown@gmail.com"
